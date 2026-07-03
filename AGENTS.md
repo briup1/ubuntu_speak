@@ -130,7 +130,11 @@ mv ../ubuntu-speak_*.deb ../ubuntu-speak_*.buildinfo ../ubuntu-speak_*.changes .
 
 **打包产物目录约定**：所有 `.deb`、`.buildinfo`、`.changes` 文件必须归档到 `~/workdir/self_code/releases/`，禁止保留在项目根目录 `~/workdir/self_code/` 或源码目录 `ubuntu_speak/` 内。如果后续引入 Git，应在 `.gitignore` 中忽略这些打包产物。
 
+**GitHub Releases 上传**：使用 `scripts/upload-release.sh` 手动上传，该脚本不会自动触发。运行前需要先配置 GitHub Token（详见脚本头部注释）。Token 文件路径已通过 `.gitignore` 排除，不会进入 Git 仓库。
+
 ### 4.5 运行时系统依赖
+
+Ubuntu 桌面需安装以下工具之一：
 
 Ubuntu 桌面需安装以下工具之一：
 
@@ -256,8 +260,13 @@ uv build --wheel
 uv run pytest tests/
 
 # 打包（debian/ 补齐后）
-# dpkg-buildpackage 默认输出到源码父目录，构建后请移动到 releases/
+# 注意：dpkg-buildpackage 默认会把 .deb / .buildinfo / .changes 输出到源码父目录。
+# 为避免打包产物散落在项目同级目录，构建完成后必须统一移动到 releases/ 目录。
 cd ~/workdir/self_code/ubuntu_speak
 dpkg-buildpackage -us -uc -b
 mv ../ubuntu-speak_*.deb ../ubuntu-speak_*.buildinfo ../ubuntu-speak_*.changes ../releases/
+
+# 手动上传到 GitHub Releases（需先配置 GITHUB_TOKEN）
+./scripts/upload-release.sh
+```
 ```

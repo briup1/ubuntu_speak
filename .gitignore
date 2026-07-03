@@ -30,6 +30,8 @@ ENV/
 .env.*
 *.key
 config.json
+**/.config/ubuntu-speak/github_token
+.github_token
 
 # Debian packaging build artifacts
 debian/.debhelper/
