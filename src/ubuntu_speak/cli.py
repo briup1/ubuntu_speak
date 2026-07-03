@@ -190,13 +190,10 @@ def _run_recorder_daemon():
         if text:
             if copy_text(text):
                 state_manager.set_state(AppState.SUCCESS, f"已复制：{text[:40]}")
-                notify("识别完成", f"已复制到剪贴板：{text[:80]}")
             else:
                 state_manager.set_state(AppState.SUCCESS, f"结果：{text[:40]}（剪贴板失败）")
-                notify("识别完成", f"结果：{text[:80]}\n（剪贴板复制失败）", urgency="warning")
         else:
             state_manager.set_state(AppState.ERROR, "未能识别到语音内容")
-            notify("识别结果为空", "未能识别到语音内容", urgency="warning")
 
     except Exception as e:
         _clear_pid()

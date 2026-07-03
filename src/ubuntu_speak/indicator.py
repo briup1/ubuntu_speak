@@ -278,12 +278,8 @@ class UbuntuSpeakIndicator:
         self.record_item.set_sensitive(not is_recording)
         self.stop_item.set_sensitive(is_recording)
 
-        # 状态变化时发送桌面通知（由 indicator 统一输出，避免 daemon 丢失 X11 授权）
-        if new_state == AppState.RECORDING:
-            notify("开始录音", message or "请说话，松开快捷键后识别", urgency="low")
-        elif new_state == AppState.RECOGNIZING:
-            notify("识别中", message or "正在调用百炼语音识别 API...", urgency="low")
-        elif new_state == AppState.SUCCESS:
+        # 状态变化时发送桌面通知（只保留最终结果，中间状态由托盘图标反馈）
+        if new_state == AppState.SUCCESS:
             notify("识别完成", message or "已复制到剪贴板", urgency="normal")
         elif new_state == AppState.ERROR:
             notify("Ubuntu Speak", message or "发生错误", urgency="critical")
