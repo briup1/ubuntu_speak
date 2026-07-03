@@ -128,9 +128,53 @@ dpkg-buildpackage -us -uc -b
 mv ../ubuntu-speak_*.deb ../ubuntu-speak_*.buildinfo ../ubuntu-speak_*.changes ../releases/
 ```
 
-**打包产物目录约定**：所有 `.deb`、`.buildinfo`、`.changes` 文件必须归档到 `~/workdir/self_code/releases/`，禁止保留在项目根目录 `~/workdir/self_code/` 或源码目录 `ubuntu_speak/` 内。如果后续引入 Git，应在 `.gitignore` 中忽略这些打包产物。
+### 4.4.1 上传到 GitHub Releases
 
-**GitHub Releases 上传**：使用 `scripts/upload-release.sh` 手动上传，该脚本不会自动触发。运行前需要先配置 GitHub Token（详见脚本头部注释）。Token 文件路径已通过 `.gitignore` 排除，不会进入 Git 仓库。
+打包完成后，可以使用项目根目录下的 `scripts/upload-release.sh` 将 `.deb` 手动上传到 GitHub Releases。
+
+#### 前置条件
+
+1. 已安装 `curl` 和 `python3`（一般 Ubuntu 系统默认自带）。
+2. 已生成 GitHub Personal Access Token：
+   - 打开 https://github.com/settings/tokens/new
+   - 填写 Token name，例如 `ubuntu-speak-release`
+   - 勾选 **`repo`** 权限（创建 Release 需要）
+   - 点击 **Generate token**，复制生成的字符串（以 `ghp_` 开头）
+
+#### Token 配置方式（二选一）
+
+**方式一：环境变量（临时）**
+
+```bash
+export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
+```
+
+**方式二：本地文件（推荐）**
+
+```bash
+mkdir -p ~/.config/ubuntu-speak
+echo "ghp_xxxxxxxxxxxx" > ~/.config/ubuntu-speak/github_token
+chmod 600 ~/.config/ubuntu-speak/github_token
+```
+
+该文件路径已加入 `.gitignore`，不会进入 Git 仓库。
+
+#### 执行上传
+
+```bash
+cd ~/workdir/self_code/ubuntu_speak
+./scripts/upload-release.sh
+```
+
+脚本会列出 `releases/` 目录下的所有 `.deb`，如果只有一个则直接使用，否则让你选择；然后解析出版本号、创建 Release、上传 `.deb`，上传前会要求输入 `yes` 确认。
+
+**注意**：
+
+- 该脚本**必须由用户主动运行**，不会自动触发。
+- 脚本会先检查同版本 Release 是否已存在，若存在则拒绝覆盖。
+- 不要把 Token 写入代码、脚本或任何会被 Git 追踪的文件。
+
+**打包产物目录约定**：所有 `.deb`、`.buildinfo`、`.changes` 文件必须归档到 `~/workdir/self_code/releases/`，禁止保留在项目根目录 `~/workdir/self_code/` 或源码目录 `ubuntu_speak/` 内。如果后续引入 Git，应在 `.gitignore` 中忽略这些打包产物。
 
 ### 4.5 运行时系统依赖
 
@@ -267,6 +311,8 @@ dpkg-buildpackage -us -uc -b
 mv ../ubuntu-speak_*.deb ../ubuntu-speak_*.buildinfo ../ubuntu-speak_*.changes ../releases/
 
 # 手动上传到 GitHub Releases（需先配置 GITHUB_TOKEN）
+# 详见 4.4.1 节
+cd ~/workdir/self_code/ubuntu_speak
 ./scripts/upload-release.sh
 ```
 ```
