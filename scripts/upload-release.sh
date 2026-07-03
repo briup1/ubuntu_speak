@@ -18,8 +18,20 @@
 set -euo pipefail
 
 REPO="briup1/ubuntu_speak"
-RELEASES_DIR="$(cd "$(dirname "$0")/.." && pwd)/releases"
 TOKEN_FILE="${HOME}/.config/ubuntu-speak/github_token"
+
+# 查找 releases/ 目录：优先使用项目源码父目录（AGENTS.md 约定位置）
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PARENT_DIR="$(cd "${PROJECT_DIR}/.." && pwd)"
+
+if [[ -d "${PROJECT_DIR}/releases" ]]; then
+    RELEASES_DIR="${PROJECT_DIR}/releases"
+elif [[ -d "${PARENT_DIR}/releases" ]]; then
+    RELEASES_DIR="${PARENT_DIR}/releases"
+else
+    RELEASES_DIR="${PROJECT_DIR}/releases"
+fi
 
 # --------------- 工具检查 ---------------
 
@@ -131,20 +143,42 @@ fi
 
 # --------------- 创建 Release ---------------
 
+# 构造 body 后通过 jq/python3 生成 JSON，避免 shell 转义问题
+BODY=$(cat <<EOF
+Ubuntu 语音输入法 ubuntu-speak ${RELEASE_NAME}
+
+- 支持 toggle 模式录音
+- 支持 evdev 按住说话
+- 包含系统托盘指示器与桌面通知
+
+## 安装
+
+\`\`\`bash
+sudo dpkg -i ${DEB_BASENAME}
+sudo apt-get install -f
+\`\`\`
+EOF
+)
+
+CREATE_PAYLOAD=$(python3 -c "
+import json, sys
+print(json.dumps({
+    'tag_name': '${TAG}',
+    'target_commitish': 'main',
+    'name': '${RELEASE_NAME}',
+    'body': '''${BODY}''',
+    'draft': False,
+    'prerelease': False
+}))
+")
+
 echo "[信息] 创建 Release ${TAG}..."
 CREATE_RESPONSE=$(curl -s -X POST \
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "Content-Type: application/json" \
     "https://api.github.com/repos/${REPO}/releases" \
-    -d "{
-        \"tag_name\": \"${TAG}\",
-        \"target_commitish\": \"main\",
-        \"name\": \"${RELEASE_NAME}\",
-        \"body\": \"Ubuntu 语音输入法 ubuntu-speak ${RELEASE_NAME}\\n\\n- 支持 toggle 模式录音\\n- 支持 evdev 按住说话\\n- 包含系统托盘指示器与桌面通知\\n\\n## 安装\\n\\n\\\`\\\`\\\`bash\\nsudo dpkg -i ${DEB_BASENAME}\\nsudo apt-get install -f\\n\\\`\\\`\\\`\",
-        \"draft\": false,
-        \"prerelease\": false
-    }")
+    -d "${CREATE_PAYLOAD}")
 
 UPLOAD_URL=$(echo "${CREATE_RESPONSE}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('upload_url','').replace('{?name,label}',''))" 2>/dev/null || true)
 RELEASE_ID=$(echo "${CREATE_RESPONSE}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))" 2>/dev/null || true)
