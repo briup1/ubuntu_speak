@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Ubuntu Speak
+Name[zh_CN]=Ubuntu 语音输入
+Comment=Voice input for Ubuntu using DashScope ASR
+Comment[zh_CN]=基于百炼语音识别的 Ubuntu 语音输入法
+Exec=ubuntu-speak --listen-hotkey
+Icon=ubuntu-speak
+Type=Application
+Terminal=false
+Categories=Utility;Audio;
+Keywords=voice;speech;input;asr;stt;
+StartupNotify=true
+X-GNOME-Autostart-enabled=false

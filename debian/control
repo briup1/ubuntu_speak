@@ -1,0 +1,36 @@
+Source: ubuntu-speak
+Section: utils
+Priority: optional
+Maintainer: Ubuntu Speak Team <ubuntu-speak@example.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ python3-all,
+ python3-hatchling,
+ pybuild-plugin-pyproject,
+Standards-Version: 4.6.2
+Homepage: https://github.com/example/ubuntu-speak
+Rules-Requires-Root: no
+
+Package: ubuntu-speak
+Architecture: all
+Depends:
+ ${python3:Depends},
+ ${misc:Depends},
+ python3-gi,
+ python3-evdev,
+ gir1.2-gtk-4.0,
+ gir1.2-gtk-3.0,
+ gir1.2-ayatanaappindicator3-0.1,
+ libnotify-bin,
+ pipewire-bin | pulseaudio-utils,
+ sox,
+ wl-clipboard | xclip,
+Description: Voice input tool for Ubuntu
+ Ubuntu Speak is a voice input utility for the Ubuntu desktop.
+ It records audio on a global hotkey, sends it to the Alibaba
+ Cloud DashScope ASR service, and copies the recognized text
+ to the clipboard.
+ .
+ This package provides the ubuntu-speak command, a GTK settings
+ dialog, and a desktop launcher.

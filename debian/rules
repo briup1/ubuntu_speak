@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=ubuntu_speak
+export PYBUILD_SYSTEM=pyproject
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_install:
+	dh_auto_install
+	# 确保 desktop 与图标被安装到系统目录
+	dh_install data/ubuntu-speak.desktop usr/share/applications/
+	dh_install data/ubuntu-speak.svg usr/share/icons/hicolor/scalable/apps/
+	dh_install data/ubuntu-speak-recording.svg usr/share/icons/hicolor/scalable/apps/
+	dh_install data/ubuntu-speak-recognizing.svg usr/share/icons/hicolor/scalable/apps/
+	dh_install data/ubuntu-speak-success.svg usr/share/icons/hicolor/scalable/apps/
+	dh_install data/ubuntu-speak-error.svg usr/share/icons/hicolor/scalable/apps/
